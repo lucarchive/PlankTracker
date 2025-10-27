@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer App</title>
+  <style>
+    /* --- Stile generale --- */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", sans-serif;
+      background-color: #0d0d0d;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-top: 2em;
+      color: #f0f0f0;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    /* --- Pulsante circolare --- */
+    #timerBtn {
+      margin-top: 2em;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: none;
+      background: radial-gradient(circle at 30% 30%, #00ffcc, #0066ff);
+      color: white;
+      font-size: 2em;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.4);
+      transition: all 0.25s ease;
+    }
+
+    #timerBtn:hover {
+      box-shadow: 0 0 40px rgba(0, 255, 204, 0.6);
+      transform: scale(1.05);
+    }
+
+    #timerBtn:active {
+      transform: scale(0.98);
+      box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+    }
+
+    /* --- Testo timer --- */
+    #display {
+      margin-top: 1em;
+      font-size: 1.8em;
+      color: #00ffc3;
+      text-align: center;
+    }
+
+    /* --- Titolo tabella --- */
+    h3 {
+      margin-top: 2em;
+      color: #aaa;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* --- Tabella --- */
+    .table-container {
+      width: 90%;
+      max-width: 600px;
+      overflow-x: auto;
+      margin-bottom: 2em;
+    }
+
+    table {
+      margin: 1em auto;
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #111;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+    }
+
+    th {
+      background-color: #222;
+      color: #00ffc3;
+      padding: 12px;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 10px;
+      border-top: 1px solid #222;
+      text-align: center;
+      font-size: 1em;
+    }
+
+    tr:nth-child(even) {
+      background-color: #141414;
+    }
+
+    tr:hover {
+      background-color: #1f1f1f;
+    }
+
+    /* --- Pulsante reset --- */
+    #clearBtn {
+      margin-bottom: 2em;
+      background: transparent;
+      border: 1px solid #00ffc3;
+      color: #00ffc3;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1em;
+    }
+
+    #clearBtn:hover {
+      background: #00ffc3;
+      color: #0d0d0d;
+    }
+
+    /* --- Riga IP --- */
+    footer {
+      margin-top: auto;
+      padding: 1em 0 1.5em;
+      color: #777;
+      font-size: 0.9em;
+      text-align: center;
+      width: 100%;
+    }
+
+    footer span {
+      color: #00ffc3;
+      font-weight: 500;
+    }
+
+    /* --- Modalità responsive --- */
+    @media (max-width: 700px) {
+      h1 {
+        font-size: 1.6em;
+        margin-top: 1.2em;
+      }
+
+      #timerBtn {
+        width: 240px;
+        height: 240px;
+        font-size: 2.2em;
+      }
+
+      #display {
+        font-size: 2.2em;
+      }
+
+      th, td {
+        font-size: 1.1em;
+      }
+
+      #clearBtn {
+        font-size: 1.1em;
+        padding: 12px 22px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #timerBtn {
+        width: 260px;
+        height: 260px;
+        font-size: 2.4em;
+      }
+
+      #display {
+        font-size: 2.4em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Timer App</h1>
+
+  <button id="timerBtn">Start</button>
+  <div id="display">0.00 s</div>
+
+  <h3>Storico utilizzi</h3>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Durata</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <button id="clearBtn">Svuota storico</button>
+
+  <footer>
+    IP locale: <span id="ipDisplay">...</span>
+  </footer>
+
+  <script>
+    let startTime = null;
+    const display = document.getElementById("display");
+    const btn = document.getElementById("timerBtn");
+    const tbody = document.getElementById("tableBody");
+    const clearBtn = document.getElementById("clearBtn");
+    const ipDisplay = document.getElementById("ipDisplay");
+    let timerInterval;
+
+    btn.addEventListener("click", async () => {
+      if (!startTime) {
+        startTime = Date.now();
+        btn.textContent = "Stop";
+        btn.style.background = "radial-gradient(circle at 30% 30%, #ff0055, #6600ff)";
+        timerInterval = setInterval(() => {
+          const seconds = (Date.now() - startTime) / 1000;
+          display.textContent = seconds.toFixed(2) + " s";
+        }, 100);
+      } else {
+        clearInterval(timerInterval);
+        const duration = (Date.now() - startTime) / 1000;
+        startTime = null;
+        btn.textContent = "Start";
+        btn.style.background = "radial-gradient(circle at 30% 30%, #00ffcc, #0066ff)";
+        display.textContent = duration.toFixed(2) + " s";
+
+        await fetch("/api/times", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ duration }),
+        });
+        loadTable();
+      }
+    });
+
+    async function loadTable() {
+      const res = await fetch("/api/times");
+      const data = await res.json();
+      tbody.innerHTML = data
+        .map((e) => `<tr><td>${e.date}</td><td>${e.duration}</td></tr>`)
+        .join("");
+    }
+
+    clearBtn.addEventListener("click", async () => {
+      await fetch("/api/times", { method: "DELETE" });
+      loadTable();
+    });
+
+    async function loadIP() {
+      const res = await fetch("/api/ip");
+      const data = await res.json();
+      ipDisplay.textContent = data.ip;
+    }
+
+    loadTable();
+    loadIP();
+  </script>
+</body>
+</html>
+
